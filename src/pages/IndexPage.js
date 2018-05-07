@@ -1,11 +1,16 @@
 import React from 'react'
 // import * as BooksAPI from './BooksAPI'
-import '../App.css'
 import Book from '../Book';
 import {getAll} from '../BooksAPI';
 import { Link } from 'react-router-dom';
+import { observer } from 'mobx-react';
+import { books as store } from '../stores/myRead.store';
 
-class BooksApp extends React.Component {
+const BooksApp = observer(class BooksApp extends React.Component {
+  constructor(){
+    super();
+    this.handleChange = this._handleChange.bind(this);
+  }
   state = {
     /**
      * TODO: Instead of using this state variable to keep track of which page
@@ -21,17 +26,23 @@ class BooksApp extends React.Component {
     // 已经读
     read: [],
   }
-  handleChange(e, bookInfo){
-    console.log(e.target.value, bookInfo);
+  _handleChange(e, bookInfo, type){
+    Object.assign(bookInfo, {type: e.target.value});
   }
   componentDidMount(){
-    getAll()
-    .then(response => {
-      console.log(response);
-      this.setState({currentlyReading: response});
-    })
+    // getAll()
+    // .then(response => {
+    //   console.log(response);
+    //   response.forEach(item => {
+    //     store.push(Object.assign(item, {type: 'none'}));
+    //   });
+    // })
   }
   render() {
+    console.log(store);
+    const currentlyReading = store.filter(item => item.type === 'currentlyReading');
+    const wantToRead = store.filter(item => item.type === 'wantToRead');
+    const read = store.filter(item => item.type === 'read');
     return (
       <div className="app">
           <div className="list-books">
@@ -44,7 +55,7 @@ class BooksApp extends React.Component {
                   <h2 className="bookshelf-title">Currently Reading</h2>
                   <div className="bookshelf-books">
                     <ol className="books-grid">
-                      { this.state.currentlyReading.length > 0 ? (this.state.currentlyReading.map(item => <Book handleChange={this.handleChange} bookInfo={item} key={item.id} {...item} />)) : <div>没有数据</div> }
+                      { currentlyReading.length > 0 ? (currentlyReading.map(item => <Book handleChange={this.handleChange} key={item.id} bookInfo={item} {...item} />)) : <div>没有数据</div> }
                     </ol>
                   </div>
                 </div>
@@ -52,7 +63,7 @@ class BooksApp extends React.Component {
                   <h2 className="bookshelf-title">Want to Read</h2>
                   <div className="bookshelf-books">
                     <ol className="books-grid">
-                      { this.state.wantToRead.length > 0 ? (this.state.wantToRead.map(item => <Book handleChange={this.handleChange} key={item.id} bookInfo={item} {...item} />)) : <div>没有数据</div> }
+                      { wantToRead.length > 0 ? (wantToRead.map(item => <Book handleChange={this.handleChange} key={item.id} bookInfo={item} {...item} />)) : <div>没有数据</div> }
                     </ol>
                   </div>
                 </div>
@@ -60,7 +71,7 @@ class BooksApp extends React.Component {
                   <h2 className="bookshelf-title">Read</h2>
                   <div className="bookshelf-books">
                     <ol className="books-grid">
-                      { this.state.read.length > 0 ? (this.state.read.map(item => <Book handleChange={this.handleChange} key={item.id} bookInfo={item} {...item} />)) : <div>没有数据</div> }
+                      { read.length > 0 ? (read.map(item => <Book handleChange={this.handleChange} key={item.id} bookInfo={item} {...item} />)) : <div>没有数据</div> }
                     </ol>
                   </div>
                 </div>
@@ -73,6 +84,6 @@ class BooksApp extends React.Component {
       </div>
     )
   }
-}
+});
 
 export default BooksApp

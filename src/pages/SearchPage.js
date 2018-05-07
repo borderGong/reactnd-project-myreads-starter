@@ -2,8 +2,13 @@ import React from 'react'
 import Book from '../Book';
 import {getAll, search} from '../BooksAPI';
 import { Link } from 'react-router-dom';
+import { books as store } from '../stores/myRead.store';
 
 class BooksApp extends React.Component {
+  constructor(){
+    super();
+    this.handleChangeType = this._handleChangeType;
+  }
   state = {
     /**
      * TODO: Instead of using this state variable to keep track of which page
@@ -23,6 +28,9 @@ class BooksApp extends React.Component {
                 this.setState({searchList: response});
             }
         })
+  }
+  _handleChangeType(e, bookInfo, type){
+    store.push(Object.assign(bookInfo, {type: e.target.value}));
   }
   componentDidMount(){
     getAll()
@@ -51,7 +59,7 @@ class BooksApp extends React.Component {
             </div>
             <div className="search-books-results">
               <ol className="books-grid">
-              { this.state.searchList.length > 0 ? (this.state.searchList.map(item => <Book handleChange={this.handleChange} bookInfo={item} key={item.id} {...item} />)) : <div>没有数据</div> }
+              { this.state.searchList.length > 0 ? (this.state.searchList.map(item => <Book handleChange={this.handleChangeType} bookInfo={item} key={item.id} {...item} />)) : <div>没有数据</div> }
               </ol>
             </div>
           </div>
