@@ -11,38 +11,17 @@ const BooksApp = observer(class BooksApp extends React.Component {
     super();
     this.handleChange = this._handleChange.bind(this);
   }
-  state = {
-    /**
-     * TODO: Instead of using this state variable to keep track of which page
-     * we're on, use the URL in the browser's address bar. This will ensure that
-     * users can use the browser's back and forward buttons to navigate between
-     * pages, as well as provide a good URL they can bookmark and share.
-     */
-    showSearchPage: false,
-    // 正在阅读
-    currentlyReading: [],
-    // 想要读
-    wantToRead: [],
-    // 已经读
-    read: [],
-  }
-  _handleChange(e, bookInfo, type){
-    Object.assign(bookInfo, {type: e.target.value});
+  _handleChange(e, bookInfo){
+    Object.assign(bookInfo, {shelf: e.target.value});
   }
   componentDidMount(){
-    // getAll()
-    // .then(response => {
-    //   console.log(response);
-    //   response.forEach(item => {
-    //     store.push(Object.assign(item, {type: 'none'}));
-    //   });
-    // })
+
   }
   render() {
     console.log(store);
-    const currentlyReading = store.filter(item => item.type === 'currentlyReading');
-    const wantToRead = store.filter(item => item.type === 'wantToRead');
-    const read = store.filter(item => item.type === 'read');
+    const currentlyReading = store.filter(item => item.shelf === 'currentlyReading');
+    const wantToRead = store.filter(item => item.shelf === 'wantToRead');
+    const read = store.filter(item => item.shelf === 'read');
     return (
       <div className="app">
           <div className="list-books">

@@ -3,11 +3,13 @@ import Book from '../Book';
 import {getAll, search} from '../BooksAPI';
 import { Link } from 'react-router-dom';
 import { books as store } from '../stores/myRead.store';
+import * as _ from 'lodash';
 
 class BooksApp extends React.Component {
   constructor(){
     super();
-    this.handleChangeType = this._handleChangeType;
+    this.handleChangeType = this._handleChangeType.bind(this);
+    this.handleChange = this._handleChange.bind(this);
   }
   state = {
     /**
@@ -21,21 +23,32 @@ class BooksApp extends React.Component {
     // 搜索列表
     searchList: []
   }
-  handleChange = (e, bookInfo) => {
-    search(e.target.value, bookInfo)
+  _handleChange(e){
+    const keyword = this.refs['input'].value;
+    search(keyword)
         .then(response => {
             if(response){
-                this.setState({searchList: response});
+                console.log(response);
+                if(Array.isArray(response)){
+                  this.setState({searchList: response});
+                }else{
+                  this.setState({searchList: []});
+                }
             }
         })
   }
   _handleChangeType(e, bookInfo, type){
-    store.push(Object.assign(bookInfo, {type: e.target.value}));
+    const bookIndex = store.findIndex(item => item.id === bookInfo.id);
+    // 如果不存在该本书数据就添加数据否者更新数据
+    if(!(~bookIndex)){
+      store.push(Object.assign(bookInfo, {shelf: e.target.value}));
+    }else{
+      Object.assign(store[bookIndex], {shelf: e.target.value});
+    }
   }
   componentDidMount(){
     getAll()
     .then(response => {
-      console.log(response);
       this.setState({searchList: response});
     })
   }
@@ -54,7 +67,7 @@ class BooksApp extends React.Component {
                   However, remember that the BooksAPI.search method DOES search by title or author. So, don't worry if
                   you don't find a specific author or title. Every search is limited by search terms.
                 */}
-                <input type="text" onChange={this.handleChange} placeholder="Search by title or author"/>
+                <input type="text" ref="input" onChange={_.debounce(this.handleChange, 400)} placeholder="Search by title or author"/>
               </div>
             </div>
             <div className="search-books-results">
