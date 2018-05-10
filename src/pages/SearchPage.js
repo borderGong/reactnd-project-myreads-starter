@@ -1,6 +1,6 @@
 import React from 'react'
 import Book from '../Book';
-import {getAll, search} from '../BooksAPI';
+import { getAll, search} from '../BooksAPI';
 import { Link } from 'react-router-dom';
 import { books as store } from '../stores/myRead.store';
 import * as _ from 'lodash';
@@ -23,6 +23,9 @@ class BooksApp extends React.Component {
     // 搜索列表
     searchList: []
   }
+  combineStateFromStore(books){
+    return books.map(book => store.find(item => item.id === book.id) ? Object.assign(book, store.find(item => item.id === book.id)) : book);
+  }
   _handleChange(e){
     const keyword = this.refs['input'].value;
     search(keyword)
@@ -30,7 +33,8 @@ class BooksApp extends React.Component {
             if(response){
                 console.log(response);
                 if(Array.isArray(response)){
-                  this.setState({searchList: response});
+                  const searchBooks = this.combineStateFromStore(response);
+                  this.setState({searchList: searchBooks});
                 }else{
                   this.setState({searchList: []});
                 }
@@ -39,18 +43,23 @@ class BooksApp extends React.Component {
   }
   _handleChangeType(e, bookInfo, type){
     const bookIndex = store.findIndex(item => item.id === bookInfo.id);
+    const shelfText = e.target.value;
     // 如果不存在该本书数据就添加数据否者更新数据
     if(!(~bookIndex)){
       store.push(Object.assign(bookInfo, {shelf: e.target.value}));
     }else{
       Object.assign(store[bookIndex], {shelf: e.target.value});
     }
+    localStorage.setItem('books', JSON.stringify(store.peek()));
+    this.setState(perState => {
+      return {
+        searchList: perState.searchList.map(item => item.id === bookInfo.id ? 
+          Object.assign({}, item, {shelf: shelfText}) : item)
+      } 
+    })
   }
   componentDidMount(){
-    getAll()
-    .then(response => {
-      this.setState({searchList: response});
-    })
+  
   }
   render() {
     return (

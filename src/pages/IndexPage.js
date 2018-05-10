@@ -13,9 +13,37 @@ const BooksApp = observer(class BooksApp extends React.Component {
   }
   _handleChange(e, bookInfo){
     Object.assign(bookInfo, {shelf: e.target.value});
+    localStorage.setItem('books', JSON.stringify(store.peek()));    
   }
   componentDidMount(){
 
+    const booksStr = localStorage.getItem('books');
+    // 如果第一次加载获取api数据 否则读取缓存数据
+    if(!booksStr){
+      getAll()
+        .then(response => {
+          if(Array.isArray(response)){
+            const searchBooks = response.map(item => Object.assign(item, {shelf: 'wantToRead'}));
+            searchBooks.forEach(item => store.push(item));
+          }
+        })
+      return;  
+    }
+    try{
+      const books = JSON.parse(booksStr);
+      books.forEach(book => {
+        const bookIndex = store.findIndex(item => item.id === book.id);
+        // 如果不存在该本书数据就添加数据否者更新数据
+        if(!(~bookIndex)){
+          store.push(book);
+        }else{
+          Object.assign(store[bookIndex], book);
+        }
+      })
+      
+    }catch(e){
+
+    }
   }
   render() {
     console.log(store);
