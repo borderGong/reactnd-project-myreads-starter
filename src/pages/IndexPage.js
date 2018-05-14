@@ -15,6 +15,18 @@ const BooksApp = observer(class BooksApp extends React.Component {
     Object.assign(bookInfo, {shelf: e.target.value});
     localStorage.setItem('books', JSON.stringify(store.peek()));    
   }
+  createShelf(){
+    const random = Math.round(Math.random() * 10);
+    if(random >= 0 && random <= 3){
+      return 'currentlyReading';
+    }
+    if(random > 3 && random <= 6){
+      return 'wantToRead';
+    }
+    if(random > 6){
+      return 'read';
+    }
+  }
   componentDidMount(){
 
     const booksStr = localStorage.getItem('books');
@@ -23,7 +35,7 @@ const BooksApp = observer(class BooksApp extends React.Component {
       getAll()
         .then(response => {
           if(Array.isArray(response)){
-            const searchBooks = response.map(item => Object.assign(item, {shelf: 'wantToRead'}));
+            const searchBooks = response.map(item => Object.assign(item, {shelf: this.createShelf()}));
             searchBooks.forEach(item => store.push(item));
           }
         })
